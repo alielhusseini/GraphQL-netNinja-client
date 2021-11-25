@@ -6,11 +6,13 @@ function AddBook(props) {
     const data = props.data
     const bookNameRef = useRef()
     const bookGenreRef = useRef()
+    const authorRef = useRef()
 
     const handleSubmit = e => {
         e.preventDefault()
 
-        console.log(bookNameRef.current.value, bookGenreRef.current.value)
+        //console.log(bookNameRef.current.value, bookGenreRef.current.value, authorRef.current.value)
+        
     }
 
     const displayAuthors = useCallback((data) => {
@@ -32,7 +34,7 @@ function AddBook(props) {
             </div>
             <div className="field">
                 <label>Author:</label>
-                <select>
+                <select ref={authorRef}>
                     <option>Select author</option>
                     { displayAuthors(data) }
                 </select>
