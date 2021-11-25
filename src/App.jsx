@@ -22,4 +22,5 @@ function App() {
 
 export default App;
 // git config --get remote.origin.url to know the remote version
-// git remote -v
+// git remote -v this is another way to know the remote
+// git pull origin master to pull

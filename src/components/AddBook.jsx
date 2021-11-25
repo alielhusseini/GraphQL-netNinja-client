@@ -1,9 +1,10 @@
 import { useRef, useCallback } from 'react'
 import { graphql } from 'react-apollo'
-import { getAuthorsQuery } from '../queries/queries'
+import {flowRight as compose} from 'lodash';
+import { getAuthorsQuery, addBookMutation, getBooksQuery } from '../queries/queries' // though we are importing 2 queries we can bind by the HOC only one query, so for the mutation we'll use 'compose'
 
-function AddBook(props) {
-    const data = props.data
+function AddBook({ getAuthorsQuery: data, addBookMutation }) {
+    
     const bookNameRef = useRef()
     const bookGenreRef = useRef()
     const authorRef = useRef()
@@ -11,8 +12,20 @@ function AddBook(props) {
     const handleSubmit = e => {
         e.preventDefault()
 
-        //console.log(bookNameRef.current.value, bookGenreRef.current.value, authorRef.current.value)
-        
+        if (!bookNameRef.current.value ||!bookGenreRef.current.value || !authorRef.current.value) return alert('fields cannot be empty')
+
+        addBookMutation({
+            variables: {
+                name: bookNameRef.current.value,
+                genre: bookGenreRef.current.value,
+                authorId: authorRef.current.value,
+            }, // we can tell graphql to re-fetch a particular query which will end up in re-rendering the component -> no need for the useEffect here
+            refetchQueries: [{ query: getBooksQuery}] // which will end up re-rendering the component which is responsible (getting data) for getBooksQuery -> BookList.jsx
+        })
+
+        bookNameRef.current.value = ""
+        bookGenreRef.current.value = ""
+        authorRef.current.value = ""
     }
 
     const displayAuthors = useCallback((data) => {
@@ -44,4 +57,8 @@ function AddBook(props) {
     )
 }
 
-export default graphql(getAuthorsQuery)(AddBook)
+export default compose( // now we can list different queries & mutations unlike the down below
+    graphql(getAuthorsQuery, {name: 'getAuthorsQuery'}),
+    graphql(addBookMutation, {name: 'addBookMutation'}),
+)(AddBook) // binding the 2 queries to the component
+// export default graphql(getAuthorsQuery)(AddBook) by can bind only one query by the HOC method
